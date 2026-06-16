@@ -47,9 +47,9 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
   });
 
-  const port = process.env.PORT || 4000;
-  await app.listen(port);
-  console.log(`DCP API listening on http://localhost:${port}`);
+  const port = Number(process.env.PORT) || 4000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`DCP API listening on http://0.0.0.0:${port}`);
   console.log(`Swagger UI: http://localhost:${port}/docs`);
 }
 bootstrap();

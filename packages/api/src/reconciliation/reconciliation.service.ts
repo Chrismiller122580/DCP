@@ -21,18 +21,30 @@ export class ReconciliationService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     // Use BullMQ repeatable job for reliable scheduled reconciliation (distributed, survives restarts)
-    await this.reconQueue.add(
-      'run-reconciliation',
-      {},
-      {
-        repeat: {
-          every: this.RECONCILE_INTERVAL_MS,
-        },
-        removeOnComplete: 10,
-        removeOnFail: 5,
-      },
-    );
-    this.logger.log('Reconciliation queue job scheduled (BullMQ)');
+    try {
+      await Promise.race([
+        this.reconQueue.add(
+          'run-reconciliation',
+          {},
+          {
+            repeat: {
+              every: this.RECONCILE_INTERVAL_MS,
+            },
+            removeOnComplete: 10,
+            removeOnFail: 5,
+          },
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Redis connection timeout')), 5000),
+        ),
+      ]);
+      this.logger.log('Reconciliation queue job scheduled (BullMQ)');
+    } catch (err) {
+      this.logger.warn(
+        'Reconciliation queue unavailable — API will start without scheduled reconciliation. Add Railway Redis and set REDIS_URL.',
+        err,
+      );
+    }
   }
 
   onModuleDestroy() {

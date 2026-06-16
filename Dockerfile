@@ -1,8 +1,10 @@
 # DCP API — production image (monorepo)
-FROM node:20-alpine AS builder
+# Debian slim avoids Prisma/OpenSSL issues common on Alpine.
+FROM node:20-slim AS builder
 
-# Prisma engine requires OpenSSL on Alpine (missing by default)
-RUN apk add --no-cache openssl libc6-compat
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY package.json package-lock.json turbo.json tsconfig.json ./
@@ -14,9 +16,11 @@ RUN npm ci
 RUN npx turbo run build --filter=@dcp/api
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
-RUN apk add --no-cache openssl libc6-compat
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -25,8 +29,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/prisma ./prisma
+COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 WORKDIR /app/packages/api
 EXPOSE 4000
 
-CMD ["sh", "-c", "npx prisma db push --schema=../../prisma/schema.prisma && node dist/api/src/main.js"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

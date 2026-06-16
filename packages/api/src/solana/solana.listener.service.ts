@@ -16,6 +16,14 @@ export class SolanaListenerService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
+    try {
+      await this.startListener();
+    } catch (err) {
+      this.logger.error('Failed to start Solana listener', err);
+    }
+  }
+
+  private async startListener() {
     const provider = new SolanaPaymentProvider('testnet');
     this.unsubscribe = await provider.subscribeToPayments(this.LISTEN_ADDRESS, async (payment) => {
       if (payment.isValid) {

@@ -27,14 +27,24 @@ import { MerchantsModule } from './merchants/merchants.module';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('REDIS_URL');
+        const redisUrl =
+          configService.get<string>('REDIS_PRIVATE_URL') ||
+          configService.get<string>('REDIS_URL');
         if (redisUrl) {
-          return { connection: { url: redisUrl } };
+          return {
+            connection: {
+              url: redisUrl,
+              connectTimeout: 5000,
+              maxRetriesPerRequest: null,
+            },
+          };
         }
         return {
           connection: {
             host: configService.get('REDIS_HOST', 'localhost'),
             port: configService.get('REDIS_PORT', 6379),
+            connectTimeout: 5000,
+            maxRetriesPerRequest: null,
           },
         };
       },

@@ -16,6 +16,14 @@ export class EvmListenerService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
+    try {
+      await this.startListener();
+    } catch (err) {
+      this.logger.error('Failed to start EVM listener', err);
+    }
+  }
+
+  private async startListener() {
     const provider = new BasePaymentProvider('testnet');
     this.unsubscribe = await provider.subscribeToPayments(this.LISTEN_ADDRESS, async (payment) => {
       if (payment.isValid) {
