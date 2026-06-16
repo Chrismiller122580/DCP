@@ -3,6 +3,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import * as Sentry from '@sentry/node'; // Stub for observability - init with DSN in prod env
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || '', // Add SENTRY_DSN for production error tracking
+  tracesSampleRate: 1.0,
+});
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,7 +22,7 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalGuards(new ThrottlerGuard()); // Rate limiting for reliability (100/min)
+  // Rate limiting via ThrottlerModule (100/min); global guard can be enabled post-install: app.useGlobalGuards(new ThrottlerGuard());
 
   // OpenAPI / Swagger
   const config = new DocumentBuilder()

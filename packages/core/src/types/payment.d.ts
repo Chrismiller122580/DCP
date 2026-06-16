@@ -15,4 +15,3 @@ export interface PaymentEvent {
     payment?: PaymentConfirmation;
     timestamp: string;
 }
-//# sourceMappingURL=payment.d.ts.map

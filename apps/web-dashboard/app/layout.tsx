@@ -14,12 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DCP Merchant Dashboard",
+  title: "Direct Connect Pay — Merchant Dashboard",
   description: "Manage invoices and payments — Multi-coin crypto gateway (XRPL, BTC, ETH, SOL, USDC, DOGE)",
+  manifest: "/manifest.json",
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>D</text></svg>",
-    apple: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>D</text></svg>",
-    shortcut: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>D</text></svg>",
+    icon: [
+      { url: "/brand/cropped-dcp-icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/brand/cropped-dcp-icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/brand/cropped-dcp-icon-192x192.png",
+    shortcut: "/brand/cropped-dcp-icon-192x192.png",
   },
 };
 

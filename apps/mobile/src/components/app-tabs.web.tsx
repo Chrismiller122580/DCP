@@ -7,7 +7,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Pressable, useColorScheme, View, StyleSheet, Image } from 'react-native';
 
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
@@ -54,9 +54,10 @@ export function CustomTabList(props: TabListProps) {
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          Expo Starter
-        </ThemedText>
+        <View style={styles.brandRow}>
+          <Image source={require('@/assets/images/icon.png')} style={styles.brandIcon} />
+          <Image source={require('@/assets/images/dcp-logo-100.png')} style={styles.brandLogo} resizeMode="contain" />
+        </View>
 
         {props.children}
 
@@ -94,8 +95,20 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     maxWidth: MaxContentWidth,
   },
-  brandText: {
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginRight: 'auto',
+  },
+  brandIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+  },
+  brandLogo: {
+    width: 72,
+    height: 22,
   },
   pressed: {
     opacity: 0.7,

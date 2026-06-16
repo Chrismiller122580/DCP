@@ -20,9 +20,9 @@ export class AppController {
       timestamp: new Date().toISOString(),
       chains: {
         xrpl: xrplStatus,
-        // other chains would report here in prod
+        // TODO: add real status for bitcoin/ethereum/solana/base/dogecoin via providers
       },
-      features: ['reliable-webhooks', 'idempotent-payments', 'listener+polling-fallback'],
+      features: ['reliable-webhooks', 'idempotent-payments', 'listener+polling-fallback', 'bullmq-queues', 'reconciliation'],
     };
   }
 

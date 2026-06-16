@@ -5,4 +5,3 @@ export * from './types/webhook';
 export * from './constants/chains';
 export * from './utils/amount';
 export * from './utils/id';
-//# sourceMappingURL=index.d.ts.map

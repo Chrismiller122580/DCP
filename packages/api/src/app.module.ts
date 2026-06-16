@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InvoicesModule } from './invoices/invoices.module';
@@ -12,7 +12,8 @@ import { ReconciliationModule } from './reconciliation/reconciliation.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { BalancesModule } from './balances/balances.module';
 import { BullModule } from '@nestjs/bullmq';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SolanaModule } from './solana/solana.module';
+import { EvmModule } from './evm/evm.module';
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     PayoutsModule,
     ReconciliationModule,
     BalancesModule,
+    SolanaModule,
+    EvmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

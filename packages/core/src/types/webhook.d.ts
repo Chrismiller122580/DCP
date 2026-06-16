@@ -14,4 +14,3 @@ export interface WebhookPayload {
     timestamp: string;
     signature?: string;
 }
-//# sourceMappingURL=webhook.d.ts.map

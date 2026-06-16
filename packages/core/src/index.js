@@ -22,4 +22,3 @@ __exportStar(require("./types/webhook"), exports);
 __exportStar(require("./constants/chains"), exports);
 __exportStar(require("./utils/amount"), exports);
 __exportStar(require("./utils/id"), exports);
-//# sourceMappingURL=index.js.map

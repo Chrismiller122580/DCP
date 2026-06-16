@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, CameraView } from 'expo-camera';
 
@@ -103,6 +103,26 @@ export default function DCPPayScreen() {
       setHistory((h) => [entry, ...h].slice(0, 8));
 
       Alert.alert('Payment simulated!', `Details sent • tx ${json.simulatedTxHash?.slice(0, 10)}...\n\nListener (for XRPL) will confirm shortly.`);
+      
+      // Reliability: poll for status update (in case of real confirmation)
+      if (parsed.tag) {
+        // Reliability: poll for real confirmation from listener/reconciliation
+        const poll = setInterval(async () => {
+          try {
+            // In real: GET /invoices with tag or address filter (add endpoint if needed)
+            const check = await fetch(`${API_BASE}/v1/invoices`, { headers: { 'X-API-Key': DEV_KEY } });
+            if (check.ok) {
+              const list = await check.json();
+              const updated = list.find((i: any) => i.destinationTag == parsed.tag && i.status === 'paid');
+              if (updated) {
+                Alert.alert('Confirmed on-chain!', `Invoice paid via listener. Tx: ${updated.txHash?.slice(0,12)}`);
+                clearInterval(poll);
+              }
+            }
+          } catch {}
+        }, 5000);
+        setTimeout(() => clearInterval(poll), 60000); // stop after 1min
+      }
       // clear for next
       setParsed(null);
       setUriInput('');
@@ -116,7 +136,10 @@ export default function DCPPayScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>DCP Pay</Text>
+        <View style={styles.brandHeader}>
+          <Image source={require('@/assets/images/icon.png')} style={styles.brandIcon} />
+          <Image source={require('@/assets/images/dcp-logo-100.png')} style={styles.brandLogo} resizeMode="contain" />
+        </View>
         <Text style={styles.subtitle}>Customer app — Scan • Pay • History</Text>
 
         {/* Pay Section */}
@@ -211,7 +234,9 @@ export default function DCPPayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'rgba(17, 17, 17, 0.92)' },
   content: { padding: 20, gap: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  brandHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 4 },
+  brandIcon: { width: 40, height: 40, borderRadius: 10 },
+  brandLogo: { width: 120, height: 36 },
   subtitle: { color: 'rgba(136, 136, 136, 0.9)', textAlign: 'center', marginBottom: 12 },
   card: { backgroundColor: 'rgba(31, 31, 31, 0.82)', borderRadius: 16, padding: 18, gap: 12, borderWidth: 1, borderColor: 'rgba(51, 51, 51, 0.5)' },
   cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600', marginBottom: 4 },

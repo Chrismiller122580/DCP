@@ -17,6 +17,7 @@ model Merchant {
   apiKeyHash    String   @unique
   webhookUrl    String?
   webhookSecret String?
+  kycVerified   Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

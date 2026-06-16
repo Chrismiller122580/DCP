@@ -12,4 +12,3 @@ export interface Merchant {
         kycRequired?: boolean;
     };
 }
-//# sourceMappingURL=merchant.d.ts.map

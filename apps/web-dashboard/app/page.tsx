@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Invoice {
   id: string;
@@ -175,13 +176,27 @@ export default function DCPMerchantDashboard() {
       {/* Top nav */}
       <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-bold tracking-tighter">D</div>
+          <a href="https://www.directconnectpay.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <Image
+              src="/brand/dcp-icon.png"
+              alt="Direct Connect Pay"
+              width={32}
+              height={32}
+              className="rounded-lg"
+              priority
+            />
             <div>
-              <div className="font-semibold tracking-tighter text-xl">DCP</div>
-              <div className="text-[10px] text-zinc-500 -mt-1">MERCHANT DASHBOARD</div>
+              <Image
+                src="/brand/dcp-logo-100.png"
+                alt="DCP"
+                width={100}
+                height={30}
+                className="h-[22px] w-auto"
+                priority
+              />
+              <div className="text-[10px] text-zinc-500 -mt-0.5">MERCHANT DASHBOARD</div>
             </div>
-          </div>
+          </a>
 
           <div className="flex items-center gap-4 text-sm">
             <div className="text-zinc-400">API</div>
@@ -224,11 +239,42 @@ export default function DCPMerchantDashboard() {
           </div>
         </div>
 
+        {/* Analytics */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="card p-4">
+            <div className="text-xs text-zinc-400">TOTAL VOLUME</div>
+            <div className="text-2xl font-semibold mt-1">
+              {invoices.reduce((sum, inv) => sum + parseFloat(inv.amount || '0'), 0).toFixed(2)} 
+              <span className="text-sm text-zinc-400 ml-1">XRP equiv</span>
+            </div>
+          </div>
+          <div className="card p-4">
+            <div className="text-xs text-zinc-400">PENDING</div>
+            <div className="text-2xl font-semibold mt-1 text-amber-400">
+              {invoices.filter(i => i.status === 'pending').length}
+            </div>
+          </div>
+          <div className="card p-4">
+            <div className="text-xs text-zinc-400">PAID</div>
+            <div className="text-2xl font-semibold mt-1 text-emerald-400">
+              {invoices.filter(i => i.status === 'paid').length}
+            </div>
+          </div>
+          <div className="card p-4">
+            <div className="text-xs text-zinc-400">SUCCESS RATE</div>
+            <div className="text-2xl font-semibold mt-1">
+              {invoices.length > 0 
+                ? Math.round((invoices.filter(i => i.status === 'paid').length / invoices.length) * 100) 
+                : 0}%
+            </div>
+          </div>
+        </div>
+
         {/* Create Invoice */}
         <div className="card p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="font-semibold">Create Invoice</div>
-            <div className="text-xs px-3 py-1 rounded-full bg-zinc-800/70 text-zinc-400">Multi-coin • Non-custodial</div>
+            <div className="text-xs px-3 py-1 rounded-full bg-zinc-800/70 text-zinc-400">Multi-coin • Non-custodial • KYC stub</div>
           </div>
 
           <form onSubmit={createInvoice} className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -297,7 +343,7 @@ export default function DCPMerchantDashboard() {
           </form>
 
           <div className="text-[11px] text-zinc-500 mt-3">
-            Destination Tag + Memo generated automatically. Customer pays with any XRPL wallet. Real-time webhook on confirmation.
+            Destination Tag + Memo (or equivalent) auto-generated per coin. Real-time confirmation via listener + reliable webhook delivery (retries + audit). KYC enforcement stub.
           </div>
         </div>
 
@@ -321,6 +367,35 @@ export default function DCPMerchantDashboard() {
               className="text-xs text-amber-400 hover:underline ml-2"
             >
               Reconcile (dev)
+            </button>
+            <button 
+              onClick={() => {
+                if (invoices.length === 0) return;
+                const headers = ['ID', 'Amount', 'Currency', 'Chain', 'Status', 'Destination', 'Tag', 'TxHash', 'Created', 'Paid'];
+                const rows = invoices.map(inv => [
+                  inv.id,
+                  inv.amount,
+                  inv.currency,
+                  inv.chain,
+                  inv.status,
+                  inv.destinationAddress,
+                  inv.destinationTag || '',
+                  inv.txHash || '',
+                  inv.createdAt,
+                  inv.paidAt || ''
+                ]);
+                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dcp-invoices-${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="text-xs text-emerald-400 hover:underline ml-2"
+            >
+              Export CSV
             </button>
           </div>
 
@@ -465,12 +540,32 @@ export default function DCPMerchantDashboard() {
             </div>
 
             {selected.status === 'pending' && (
-              <button
-                onClick={() => simulatePayment(selected.id)}
-                className="btn btn-secondary w-full mt-3 text-amber-400 border-amber-400/40 hover:bg-amber-400/10"
-              >
-                Simulate Payment (dev) — sends real testnet tx
-              </button>
+              <>
+                <button
+                  onClick={() => simulatePayment(selected.id)}
+                  className="btn btn-secondary w-full mt-3 text-amber-400 border-amber-400/40 hover:bg-amber-400/10"
+                >
+                  Simulate Payment (dev) — sends real testnet tx
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch(`${API_URL}/v1/dev/reconcile`, { 
+                        method: 'POST', 
+                        headers: { 'X-API-Key': apiKey } 
+                      });
+                      setTimeout(() => {
+                        fetchInvoices();
+                        if (selected) openInvoice(selected); // refresh modal
+                      }, 1500);
+                      alert('Reconciled this invoice');
+                    } catch {}
+                  }}
+                  className="btn btn-secondary w-full mt-2 text-xs"
+                >
+                  Force Reconcile (dev)
+                </button>
+              </>
             )}
             <button onClick={closeModal} className="btn btn-primary w-full mt-8">Done</button>
           </div>

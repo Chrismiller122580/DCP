@@ -14,4 +14,3 @@ function fromSmallestUnit(amount, decimals) {
     const frac = (bn % divisor).toString().padStart(decimals, '0').replace(/0+$/, '');
     return frac ? `${whole}.${frac}` : whole.toString();
 }
-//# sourceMappingURL=amount.js.map

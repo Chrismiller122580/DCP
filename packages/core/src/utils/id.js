@@ -14,4 +14,3 @@ function generateApiKey() {
 function generateWebhookSecret() {
     return (0, crypto_1.randomBytes)(32).toString('hex');
 }
-//# sourceMappingURL=id.js.map

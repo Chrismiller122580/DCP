@@ -23,19 +23,26 @@ export class InvoicesService {
     if (!merchant && apiKey === 'dcp_dev_1234567890') {
       merchant = await this.prisma.merchant.upsert({
         where: { email: 'dev@local.test' },
-        update: {},
+        update: { kycVerified: true },
         create: {
           name: 'Local Dev Merchant',
           email: 'dev@local.test',
           apiKeyHash: apiKey,
           webhookUrl: null,
           webhookSecret: 'dev_webhook_secret_123',
+          kycVerified: true,
         },
       });
     }
 
     if (!merchant) {
       throw new UnauthorizedException('Invalid API key. For local dev use header X-API-Key: dcp_dev_1234567890');
+    }
+
+    // KYC enforcement for compliance/reliability (real systems would call external KYC provider)
+    // Dev merchant below is created with kycVerified=true so this passes in the demo.
+    if ((merchant as any).kycVerified === false) {
+      throw new BadRequestException('KYC verification required before creating invoices. Update merchant settings or contact support.');
     }
 
     const expiresAt = new Date(Date.now() + (dto.expiresInMinutes ?? 60) * 60 * 1000);

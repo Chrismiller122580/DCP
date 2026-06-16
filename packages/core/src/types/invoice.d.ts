@@ -1,4 +1,4 @@
-export type Chain = 'xrpl' | 'solana' | 'base' | 'ethereum';
+export type Chain = 'xrpl' | 'bitcoin' | 'ethereum' | 'solana' | 'base' | 'dogecoin';
 export type InvoiceStatus = 'draft' | 'pending' | 'paid' | 'expired' | 'canceled' | 'overpaid' | 'underpaid';
 export interface Invoice {
     id: string;
@@ -34,4 +34,3 @@ export interface InvoiceWithQR extends Invoice {
     qrCodeDataUrl?: string;
     paymentUri?: string;
 }
-//# sourceMappingURL=invoice.d.ts.map
