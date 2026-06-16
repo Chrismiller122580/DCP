@@ -12,6 +12,16 @@ Sentry.init({
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: [
+      /^https:\/\/.*\.vercel\.app$/,
+      'http://localhost:3000',
+      'http://localhost:8081',
+    ],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'X-API-Key', 'X-Admin-Key'],
+  });
+
   app.setGlobalPrefix('v1');
 
   app.useGlobalPipes(
