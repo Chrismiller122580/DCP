@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { AppHeader } from '@/components/app-header';
 import { apiFetch } from '@/lib/api';
 
 const DEFAULT_ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_API_KEY || 'dcp_admin_dev_key_1234567890';
@@ -128,21 +127,7 @@ export default function AdminPortalPage() {
 
   return (
     <div className="min-h-screen text-white">
-      <header className="dcp-header sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-[4.5rem] flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-90">
-            <Image src="/brand/dcp-icon.png" alt="" width={40} height={40} className="rounded-lg" />
-            <div>
-              <div className="text-dcp-teal font-semibold">Admin Portal</div>
-              <div className="text-[10px] text-dcp-cyan/70 tracking-widest">DIRECT CONNECT PAY</div>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-dcp-teal hover:text-dcp-cyan">Merchant Dashboard →</Link>
-            <Link href="/settings" className="text-dcp-cyan hover:underline">API Connections</Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader subtitle="ADMIN PORTAL" active="admin" />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <section className="dcp-hero p-6 mb-8 relative">

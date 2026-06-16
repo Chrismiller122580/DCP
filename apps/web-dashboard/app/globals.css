@@ -399,3 +399,7 @@ body {
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 16px rgba(0, 119, 182, 0.12);
 }
+
+.bg-dcp-teal {
+  background-color: var(--dcp-teal);
+}

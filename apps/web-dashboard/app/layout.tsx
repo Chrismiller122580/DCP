@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Direct Connect Pay — Merchant Dashboard",
-  description: "Manage invoices and payments — Multi-coin crypto gateway (XRPL, BTC, ETH, SOL, USDC, DOGE)",
+  title: "Direct Connect Pay — Crypto Payment Gateway",
+  description: "Accept crypto payments with DCP — XRPL-first merchant dashboard, API, and onboarding for multi-chain payments.",
   manifest: "/manifest.json",
   icons: {
     icon: [

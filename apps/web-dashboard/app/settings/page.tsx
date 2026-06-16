@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { AppHeader } from '@/components/app-header';
+import { AuthGuard } from '@/components/auth-guard';
 import { apiFetch } from '@/lib/api';
-
-const DEV_KEY = process.env.NEXT_PUBLIC_DEV_API_KEY || 'dcp_dev_1234567890';
+import { getStoredApiKey } from '@/lib/auth';
 
 interface MerchantProfile {
   id: string;
@@ -30,7 +29,7 @@ interface ConnectionTest {
 }
 
 export default function SettingsPage() {
-  const [apiKey, setApiKey] = useState(DEV_KEY);
+  const [apiKey, setApiKey] = useState('');
   const [profile, setProfile] = useState<MerchantProfile | null>(null);
   const [webhookUrl, setWebhookUrl] = useState('');
   const [connection, setConnection] = useState<ConnectionTest | null>(null);
@@ -54,9 +53,17 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    const key = getStoredApiKey();
+    if (key) {
+      setApiKey(key);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!apiKey) return;
     loadProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [apiKey]);
 
   async function saveWebhook(e: React.FormEvent) {
     e.preventDefault();
@@ -89,22 +96,9 @@ export default function SettingsPage() {
   }
 
   return (
+    <AuthGuard>
     <div className="min-h-screen text-white">
-      <header className="dcp-header sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-[4.5rem] flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-90">
-            <Image src="/brand/dcp-icon.png" alt="" width={40} height={40} className="rounded-lg" />
-            <div>
-              <div className="text-dcp-teal font-semibold">API Connections</div>
-              <div className="text-[10px] text-dcp-cyan/70 tracking-widest">MERCHANT SETTINGS</div>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-dcp-teal hover:text-dcp-cyan">Dashboard →</Link>
-            <Link href="/admin" className="text-dcp-cyan hover:underline">Admin Portal</Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader subtitle="MERCHANT SETTINGS" active="settings" />
 
       <div className="max-w-3xl mx-auto px-6 py-8">
         <section className="dcp-hero p-6 mb-8 relative">
@@ -114,15 +108,10 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <div className="dcp-api-panel flex items-center gap-3 mb-6">
-          <span className="stat-label">X-API-KEY</span>
-          <input
-            className="input flex-1 mono text-xs"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-          />
+        <div className="dcp-api-panel flex items-center justify-between gap-3 mb-6 text-sm">
+          <span className="text-dcp-teal/80">Authenticated session · API key stored locally</span>
           <button className="btn btn-secondary text-xs" onClick={loadProfile} disabled={loading}>
-            Load
+            Refresh
           </button>
         </div>
 
@@ -191,5 +180,6 @@ export default function SettingsPage() {
         )}
       </div>
     </div>
+    </AuthGuard>
   );
 }
