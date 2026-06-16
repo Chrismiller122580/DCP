@@ -1,0 +1,31 @@
+{
+  "name": "dcp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "DCP – XRPL-First Custom Crypto Payment Gateway & App",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "cd packages/api && npx prisma generate",
+    "db:push": "cd packages/api && npx prisma db push",
+    "db:studio": "cd packages/api && npx prisma studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.9.18",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.7.4"
+  },
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,78 @@
+// Prisma schema for DCP
+// Run: cd packages/api && npx prisma generate   (or from root npm run db:generate)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  apiKeyHash    String   @unique
+  webhookUrl    String?
+  webhookSecret String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id                  String   @id @default(cuid())
+  merchantId          String
+  merchant            Merchant @relation(fields: [merchantId], references: [id])
+
+  amount              String   // human readable e.g. "25.50"
+  currency            String   // "XRP"
+  chain               String   // "xrpl"
+
+  destinationAddress  String
+  destinationTag      Int?
+  memo                String?
+
+  status              String   @default("pending") // draft | pending | paid | expired | ...
+  expiresAt           DateTime
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  paidAt              DateTime?
+
+  txHash              String?  @unique
+  payerAddress        String?
+
+  metadata            Json?    @default("{}")
+
+  events              PaymentEvent[]
+}
+
+model PaymentEvent {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  eventType   String   // payment.confirmed | payment.expired
+  txHash      String?
+  amount      String?
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+model WebhookDelivery {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  eventType   String
+  url         String
+  payload     Json
+  signature   String?
+  status      String   // pending | delivered | failed
+  attempts    Int      @default(0)
+  lastError   String?
+  deliveredAt DateTime?
+  createdAt   DateTime @default(now())
+}
