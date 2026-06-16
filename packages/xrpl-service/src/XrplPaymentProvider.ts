@@ -105,27 +105,43 @@ export class XrplPaymentProvider implements PaymentProvider {
     const client = await getXrplClient(this.config);
 
     const handler = async (streamTx: any) => {
-      if (streamTx.type !== 'transaction' || streamTx.engine_result !== 'tesSUCCESS') return;
-      if (streamTx.transaction.TransactionType !== 'Payment') return;
+      try {
+        if (!streamTx || streamTx.type !== 'transaction') return;
 
-      const payment = streamTx.transaction as Payment;
-      if (payment.Destination !== address) return;
+        const engineOk =
+          streamTx.validated === true ||
+          streamTx.meta?.TransactionResult === 'tesSUCCESS' ||
+          streamTx.engine_result === 'tesSUCCESS';
+        if (!engineOk) return;
 
-      // Note: caller (listener) is responsible for matching tag + amount to known invoices
-      const result: PaymentVerificationResult = {
-        isValid: true,
-        txHash: streamTx.hash,
-        amountReceived: typeof payment.Amount === 'string' 
-          ? (Number(payment.Amount) / 1_000_000).toFixed(6) 
-          : undefined,
-        fromAddress: payment.Account,
-        destinationTag: payment.DestinationTag,
-        confirmedAt: new Date(streamTx.close_time_iso || Date.now()),
-        ledgerIndex: streamTx.ledger_index,
-        rawTx: streamTx,
-      };
+        // XRPL stream payloads vary: full tx under `transaction` or `tx_json`
+        const payment = (streamTx.transaction ?? streamTx.tx_json) as Payment | undefined;
+        if (!payment || payment.TransactionType !== 'Payment') return;
+        if (payment.Destination !== address) return;
 
-      await onPayment(result);
+        const txHash = streamTx.hash ?? payment.hash;
+        if (!txHash) return;
+
+        // Note: caller (listener) is responsible for matching tag + amount to known invoices
+        const result: PaymentVerificationResult = {
+          isValid: true,
+          txHash,
+          amountReceived:
+            typeof payment.Amount === 'string'
+              ? (Number(payment.Amount) / 1_000_000).toFixed(6)
+              : undefined,
+          fromAddress: payment.Account,
+          destinationTag: payment.DestinationTag,
+          confirmedAt: new Date(streamTx.close_time_iso || Date.now()),
+          ledgerIndex: streamTx.ledger_index,
+          rawTx: streamTx,
+        };
+
+        await onPayment(result);
+      } catch (err) {
+        // Never let stream parsing crash the API process
+        console.warn('[XRPL] payment stream handler skipped message:', err);
+      }
     };
 
     await client.request({
