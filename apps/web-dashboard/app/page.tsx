@@ -20,9 +20,12 @@ interface Invoice {
   paymentUri?: string;
 }
 
+// Empty NEXT_PUBLIC_API_URL → same-origin /v1/* (proxied by next.config rewrites)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const DEV_KEY = process.env.NEXT_PUBLIC_DEV_API_KEY || 'dcp_dev_1234567890';
-const API_ORIGIN = API_URL || 'http://localhost:4000';
+const API_ORIGIN =
+  process.env.NEXT_PUBLIC_API_ORIGIN ||
+  (API_URL ? API_URL.replace(/\/v1\/?$/, '') : '');
 
 export default function DCPMerchantDashboard() {
   const [apiKey, setApiKey] = useState(DEV_KEY);
@@ -199,7 +202,9 @@ export default function DCPMerchantDashboard() {
           </a>
 
           <div className="flex items-center gap-4 text-sm">
-            <a href={`${API_ORIGIN}/docs`} target="_blank" className="text-dcp-teal hover:text-dcp-cyan transition-colors font-medium">API Docs →</a>
+            {API_ORIGIN ? (
+              <a href={`${API_ORIGIN}/docs`} target="_blank" rel="noopener noreferrer" className="text-dcp-teal hover:text-dcp-cyan transition-colors font-medium">API Docs →</a>
+            ) : null}
             <div className="h-3 w-px bg-zinc-700" />
             <button 
               onClick={async () => {
