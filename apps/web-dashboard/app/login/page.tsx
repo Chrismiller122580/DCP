@@ -79,7 +79,13 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-zinc-800 text-center text-sm text-zinc-500 space-y-3">
+            <div className="mt-6 flex justify-center gap-4 text-xs text-zinc-600">
+              <Link href="/terms" className="hover:text-dcp-teal">Terms</Link>
+              <Link href="/privacy" className="hover:text-dcp-teal">Privacy</Link>
+              <Link href="/domains" className="hover:text-dcp-teal">Domains</Link>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-zinc-800 text-center text-sm text-zinc-500 space-y-3">
               <p>
                 New to DCP?{' '}
                 <Link href="/onboarding" className="text-dcp-teal hover:underline">

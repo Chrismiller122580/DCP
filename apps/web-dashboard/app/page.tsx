@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 
 const features = [
@@ -129,18 +130,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t border-zinc-800 py-8 text-center text-xs text-zinc-500">
-        <a
-          href="https://www.directconnectpay.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-dcp-teal hover:underline"
-        >
-          directconnectpay.com
-        </a>
-        <span className="mx-2">·</span>
-        <span>DCP Platform © {new Date().getFullYear()}</span>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

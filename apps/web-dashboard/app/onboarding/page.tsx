@@ -178,8 +178,15 @@ export default function OnboardingPage() {
                 </div>
               </dl>
               <p className="text-xs text-zinc-500 mt-6">
-                By creating an account you agree to use DCP in compliance with applicable regulations.
-                KYC verification can be enabled by an administrator when you go live.
+                By creating an account you agree to our{' '}
+                <Link href="/terms" className="text-dcp-teal hover:underline" target="_blank">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="text-dcp-teal hover:underline" target="_blank">
+                  Privacy Policy
+                </Link>
+                . KYC verification can be enabled by an administrator when you go live.
               </p>
             </>
           )}
