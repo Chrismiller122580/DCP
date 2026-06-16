@@ -15,6 +15,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.app\.github\.dev$/,
       'http://localhost:3000',
       'http://localhost:8081',
     ],
