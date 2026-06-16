@@ -218,9 +218,7 @@ export default function DCPMerchantDashboard() {
             >
               Rates
             </button>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-[rgba(78,205,196,0.12)] text-dcp-teal border border-[rgba(78,205,196,0.25)]">
-              XRPL + 5 chains
-            </span>
+            <span className="dcp-badge">XRPL + 5 chains</span>
           </div>
         </div>
       </header>
@@ -249,9 +247,9 @@ export default function DCPMerchantDashboard() {
                 </blockquote>
               </div>
             </div>
-            <div className="flex flex-col gap-2 text-right shrink-0">
-              <span className="text-xs text-zinc-500 uppercase tracking-wider">Powered by</span>
-              <span className="text-dcp-cyan font-semibold text-lg">DCP Platform</span>
+            <div className="glass-cyan rounded-xl p-4 flex flex-col gap-2 text-right shrink-0">
+              <span className="text-xs text-dcp-teal/70 uppercase tracking-wider">Powered by</span>
+              <span className="text-dcp-cyan font-semibold text-lg drop-shadow-[0_0_12px_rgba(0,168,232,0.4)]">DCP Platform</span>
               <a
                 href="https://www.directconnectpay.com"
                 target="_blank"
@@ -271,8 +269,8 @@ export default function DCPMerchantDashboard() {
             <p className="text-zinc-400 mt-1">Create invoices. Monitor. Get paid in seconds.</p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-xs text-zinc-500">X-API-KEY</div>
+          <div className="dcp-api-panel flex items-center gap-3">
+            <div className="text-xs text-dcp-teal/80 font-medium tracking-wide">X-API-KEY</div>
             <input
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
@@ -285,30 +283,30 @@ export default function DCPMerchantDashboard() {
 
         {/* Analytics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="card p-4">
-            <div className="text-xs text-zinc-400">TOTAL VOLUME</div>
-            <div className="text-2xl font-semibold mt-1">
-              {invoices.reduce((sum, inv) => sum + parseFloat(inv.amount || '0'), 0).toFixed(2)} 
-              <span className="text-sm text-zinc-400 ml-1">XRP equiv</span>
+          <div className="stat-card stat-card-cyan p-4">
+            <div className="stat-label">Total Volume</div>
+            <div className="stat-value text-2xl font-semibold mt-1">
+              {invoices.reduce((sum, inv) => sum + parseFloat(inv.amount || '0'), 0).toFixed(2)}
+              <span className="text-sm text-dcp-teal/60 ml-1 font-normal">XRP equiv</span>
             </div>
           </div>
-          <div className="card p-4">
-            <div className="text-xs text-zinc-400">PENDING</div>
-            <div className="text-2xl font-semibold mt-1 text-amber-400">
+          <div className="stat-card stat-card-amber p-4">
+            <div className="stat-label">Pending</div>
+            <div className="stat-value text-2xl font-semibold mt-1">
               {invoices.filter(i => i.status === 'pending').length}
             </div>
           </div>
-          <div className="card p-4">
-            <div className="text-xs text-zinc-400">PAID</div>
-            <div className="text-2xl font-semibold mt-1 text-dcp-teal">
+          <div className="stat-card stat-card-teal p-4">
+            <div className="stat-label">Paid</div>
+            <div className="stat-value text-2xl font-semibold mt-1">
               {invoices.filter(i => i.status === 'paid').length}
             </div>
           </div>
-          <div className="card p-4">
-            <div className="text-xs text-zinc-400">SUCCESS RATE</div>
-            <div className="text-2xl font-semibold mt-1">
-              {invoices.length > 0 
-                ? Math.round((invoices.filter(i => i.status === 'paid').length / invoices.length) * 100) 
+          <div className="stat-card stat-card-blue p-4">
+            <div className="stat-label">Success Rate</div>
+            <div className="stat-value text-2xl font-semibold mt-1">
+              {invoices.length > 0
+                ? Math.round((invoices.filter(i => i.status === 'paid').length / invoices.length) * 100)
                 : 0}%
             </div>
           </div>
@@ -318,12 +316,12 @@ export default function DCPMerchantDashboard() {
         <div className="card p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="font-semibold">Create Invoice</div>
-            <div className="text-xs px-3 py-1 rounded-full bg-zinc-800/70 text-zinc-400">Multi-coin • Non-custodial • KYC stub</div>
+            <div className="dcp-badge dcp-badge-cyan">Multi-coin • Non-custodial • KYC stub</div>
           </div>
 
           <form onSubmit={createInvoice} className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-xs text-zinc-400 mb-1.5">COIN / CHAIN</label>
+              <label className="label-dcp">Coin / Chain</label>
               <select
                 value={chain}
                 onChange={(e) => {
@@ -344,7 +342,7 @@ export default function DCPMerchantDashboard() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1.5">AMOUNT</label>
+              <label className="label-dcp">Amount</label>
               <input
                 type="text"
                 value={amount}
@@ -355,7 +353,7 @@ export default function DCPMerchantDashboard() {
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1.5">CURRENCY</label>
+              <label className="label-dcp">Currency</label>
               <input
                 type="text"
                 value={currency}
@@ -365,7 +363,7 @@ export default function DCPMerchantDashboard() {
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1.5">EXPIRES (MIN)</label>
+              <label className="label-dcp">Expires (min)</label>
               <input
                 type="number"
                 value={expires}
@@ -392,14 +390,14 @@ export default function DCPMerchantDashboard() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm backdrop-blur-sm">{error}</div>
+          <div className="mb-6 p-4 dcp-error text-sm">{error}</div>
         )}
 
         {/* Invoices Table */}
-        <div className="card overflow-hidden">
-          <div className="px-6 py-4 border-b border-zinc-800/60 flex items-center justify-between">
-            <div className="font-semibold">Recent Invoices</div>
-            <button onClick={() => fetchInvoices()} className="text-xs text-zinc-400 hover:text-white">Reload</button>
+        <div className="card overflow-hidden table-wrap">
+          <div className="table-header-bar flex items-center justify-between gap-2 flex-wrap">
+            <div className="font-semibold text-dcp-teal">Recent Invoices</div>
+            <button onClick={() => fetchInvoices()} className="text-xs text-dcp-cyan hover:text-dcp-teal transition-colors">Reload</button>
             <button 
               onClick={async () => {
                 try {
@@ -437,7 +435,7 @@ export default function DCPMerchantDashboard() {
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="text-xs text-emerald-400 hover:underline ml-2"
+              className="text-xs text-dcp-teal hover:text-dcp-cyan hover:underline ml-2 transition-colors"
             >
               Export CSV
             </button>
@@ -463,8 +461,8 @@ export default function DCPMerchantDashboard() {
                 <tr><td colSpan={6} className="px-6 py-12 text-center text-zinc-500">No invoices yet. Create one above.</td></tr>
               )}
               {invoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-zinc-900/40 cursor-pointer" onClick={() => openInvoice(inv)}>
-                  <td className="mono text-xs text-emerald-400">{inv.id.slice(0, 12)}…</td>
+                <tr key={inv.id} className="cursor-pointer" onClick={() => openInvoice(inv)}>
+                  <td className="mono text-xs text-dcp-cyan">{inv.id.slice(0, 12)}…</td>
                   <td className="mono font-medium">{inv.amount} {inv.currency}</td>
                   <td className="mono text-xs text-zinc-400">
                     {inv.destinationAddress.slice(0, 10)}…{inv.destinationTag ? ` • dt:${inv.destinationTag}` : ''}
@@ -474,14 +472,14 @@ export default function DCPMerchantDashboard() {
                   </td>
                   <td className="text-xs text-zinc-400">
                     {formatDate(inv.createdAt)}
-                    {inv.paidAt && <div className="text-emerald-400">paid {formatDate(inv.paidAt)}</div>}
+                    {inv.paidAt && <div className="text-dcp-teal">paid {formatDate(inv.paidAt)}</div>}
                   </td>
                   <td className="text-xs mono">
                     {inv.txHash ? (
                       <a
                         href={`https://testnet.xrpl.org/transactions/${inv.txHash}`}
                         target="_blank"
-                        className="text-emerald-400 hover:underline"
+                        className="text-dcp-teal hover:text-dcp-cyan hover:underline transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {inv.txHash.slice(0, 8)}…
@@ -513,43 +511,43 @@ export default function DCPMerchantDashboard() {
 
       {/* Invoice Detail / QR Modal */}
       {selected && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={closeModal}>
-          <div className="card max-w-lg w-full p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 dcp-modal-overlay flex items-center justify-center z-[100] p-4" onClick={closeModal}>
+          <div className="dcp-modal max-w-lg w-full p-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-6">
               <div>
-                <div className="text-xs text-zinc-400">INVOICE</div>
-                <div className="mono text-sm text-emerald-400 mt-0.5">{selected.id}</div>
+                <div className="stat-label">Invoice</div>
+                <div className="mono text-sm text-dcp-cyan mt-0.5">{selected.id}</div>
               </div>
               <button onClick={closeModal} className="text-zinc-400 hover:text-white">✕</button>
             </div>
 
             <div className="text-center mb-8">
-              <div className="text-5xl font-semibold tracking-tighter tabular-nums mb-1">
-                {selected.amount} <span className="text-2xl align-super font-medium text-zinc-400">{selected.currency}</span>
+              <div className="dcp-modal-amount text-5xl font-semibold tracking-tighter tabular-nums mb-1 text-dcp-teal">
+                {selected.amount} <span className="text-2xl align-super font-medium text-dcp-cyan/80">{selected.currency}</span>
               </div>
               <div className={getStatusClass(selected.status) + ' mt-2 text-base px-4 py-px'}>{selected.status.toUpperCase()}</div>
             </div>
 
             {selected.qrCode && (
-              <div className="flex justify-center mb-6 bg-white p-6 rounded-2xl">
+              <div className="flex justify-center mb-6 dcp-qr-frame">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={selected.qrCode} alt="Payment QR" className="w-56 h-56" />
               </div>
             )}
 
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between border-b border-zinc-800 pb-3">
-                <div className="text-zinc-400">Destination</div>
+              <div className="flex justify-between dcp-detail-row">
+                <div className="text-dcp-teal/70">Destination</div>
                 <div className="mono text-right break-all text-xs">{selected.destinationAddress}</div>
               </div>
               {selected.destinationTag && (
-                <div className="flex justify-between border-b border-zinc-800 pb-3">
-                  <div className="text-zinc-400">Destination Tag</div>
+                <div className="flex justify-between dcp-detail-row">
+                  <div className="text-dcp-teal/70">Destination Tag</div>
                   <div className="mono font-medium">{selected.destinationTag}</div>
                 </div>
               )}
-              <div className="flex justify-between border-b border-zinc-800 pb-3">
-                <div className="text-zinc-400">Expires</div>
+              <div className="flex justify-between dcp-detail-row">
+                <div className="text-dcp-teal/70">Expires</div>
                 <div>{formatDate(selected.expiresAt)}</div>
               </div>
               {selected.paymentUri && (
@@ -563,16 +561,16 @@ export default function DCPMerchantDashboard() {
                       Copy
                     </button>
                   </div>
-                  <div className="mono text-[11px] bg-black/60 p-3 rounded-xl break-all border border-zinc-800">{selected.paymentUri}</div>
+                  <div className="mono text-[11px] dcp-uri-box break-all">{selected.paymentUri}</div>
                 </div>
               )}
 
               {/* Reliability: Webhook delivery status */}
-              <div className="pt-4 border-t border-zinc-800 mt-4">
-                <div className="text-xs text-zinc-400 mb-2">Webhook Deliveries (retries + audit)</div>
+              <div className="pt-4 border-t border-[rgba(78,205,196,0.15)] mt-4">
+                <div className="stat-label mb-2">Webhook Deliveries</div>
                 {webhookDeliveries.length > 0 ? (
                   webhookDeliveries.map((d, i) => (
-                    <div key={i} className="text-[10px] mono bg-black/40 p-2 rounded mb-1">
+                    <div key={i} className="text-[10px] mono dcp-webhook-item mb-1">
                       {d.eventType} • {d.status} (attempts: {d.attempts}) {d.deliveredAt ? '✓ ' + new Date(d.deliveredAt).toLocaleTimeString() : ''}
                     </div>
                   ))

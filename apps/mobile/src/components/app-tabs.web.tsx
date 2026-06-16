@@ -61,9 +61,9 @@ export function CustomTabList(props: TabListProps) {
 
         {props.children}
 
-        <ExternalLink href="https://docs.expo.dev" asChild>
+        <ExternalLink href="https://www.directconnectpay.com" asChild>
           <Pressable style={styles.externalPressable}>
-            <ThemedText type="link">Docs</ThemedText>
+            <ThemedText type="link">DCP</ThemedText>
             <SymbolView
               tintColor={colors.text}
               name={{ ios: 'arrow.up.right.square', web: 'link' }}
@@ -94,6 +94,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: Spacing.two,
     maxWidth: MaxContentWidth,
+    backgroundColor: 'rgba(0, 119, 182, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.25)',
+    boxShadow: '0 4px 24px rgba(78, 205, 196, 0.12)',
+    backdropFilter: 'blur(12px)',
   },
   brandRow: {
     flexDirection: 'row',

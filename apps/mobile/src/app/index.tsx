@@ -135,9 +135,13 @@ export default function DCPPayScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.bgGlowTop} />
+      <View style={styles.bgGlowBottom} />
       <View style={styles.brandBanner}>
         <View style={styles.brandHeader}>
-          <Image source={require('@/assets/images/icon.png')} style={styles.brandIcon} />
+          <View style={styles.iconShadow}>
+            <Image source={require('@/assets/images/icon.png')} style={styles.brandIcon} />
+          </View>
           <View>
             <Image source={require('@/assets/images/dcp-logo-100.png')} style={styles.brandLogo} resizeMode="contain" />
             <Text style={styles.brandTagline}>Scan • Pay • Get Paid</Text>
@@ -145,7 +149,9 @@ export default function DCPPayScreen() {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.subtitle}>Direct Connect Pay — Customer Wallet</Text>
+        <View style={styles.subtitlePill}>
+          <Text style={styles.subtitle}>Direct Connect Pay — Customer Wallet</Text>
+        </View>
 
         {/* Pay Section */}
         <View style={styles.card}>
@@ -195,7 +201,7 @@ export default function DCPPayScreen() {
           )}
 
           {parsed && !isScanning && (
-            <View style={styles.details}>
+            <View style={styles.detailsPanel}>
               <Text style={styles.detailText}>To: {parsed.destination.slice(0, 20)}...</Text>
               {parsed.amount && <Text style={styles.detailText}>Amount: {parsed.amount} XRP</Text>}
               {parsed.tag && <Text style={styles.detailText}>Destination Tag: {parsed.tag}</Text>}
@@ -241,39 +247,110 @@ const DCP_CYAN = '#00A8E8';
 const DCP_BLUE = '#0077B6';
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0b' },
+  container: { flex: 1, backgroundColor: '#09090b' },
+  bgGlowTop: {
+    position: 'absolute',
+    top: -80,
+    left: '20%',
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(78, 205, 196, 0.12)',
+  },
+  bgGlowBottom: {
+    position: 'absolute',
+    bottom: 40,
+    right: -40,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(0, 119, 182, 0.15)',
+  },
   brandBanner: {
-    backgroundColor: DCP_BLUE,
-    paddingVertical: 20,
+    backgroundColor: 'rgba(0, 119, 182, 0.85)',
+    paddingVertical: 22,
     paddingHorizontal: 20,
-    borderBottomWidth: 3,
+    borderBottomWidth: 2,
     borderBottomColor: DCP_TEAL,
+    ...Platform.select({
+      ios: {
+        shadowColor: DCP_TEAL,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 16,
+      },
+      android: { elevation: 12 },
+      default: { boxShadow: '0 8px 32px rgba(78, 205, 196, 0.25)' },
+    }),
   },
   content: { padding: 20, gap: 20 },
   brandHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 },
-  brandIcon: { width: 56, height: 56, borderRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.3)' },
+  iconShadow: {
+    ...Platform.select({
+      ios: {
+        shadowColor: DCP_TEAL,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
+      },
+      android: { elevation: 8 },
+      default: { boxShadow: '0 4px 20px rgba(78, 205, 196, 0.4)' },
+    }),
+  },
+  brandIcon: { width: 56, height: 56, borderRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)' },
   brandLogo: { width: 140, height: 42 },
   brandTagline: { color: DCP_TEAL, fontSize: 13, fontWeight: '600', marginTop: 2, letterSpacing: 0.5 },
-  subtitle: { color: DCP_TEAL, textAlign: 'center', marginBottom: 4, fontWeight: '500', fontSize: 14 },
-  card: { backgroundColor: 'rgba(24, 24, 27, 0.95)', borderRadius: 16, padding: 18, gap: 12, borderWidth: 1, borderColor: 'rgba(78, 205, 196, 0.2)' },
-  cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600', marginBottom: 4 },
-  label: { color: 'rgba(170, 170, 170, 0.85)', fontSize: 13 },
+  subtitlePill: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.25)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginBottom: 4,
+  },
+  subtitle: { color: DCP_TEAL, textAlign: 'center', fontWeight: '600', fontSize: 13 },
+  card: {
+    backgroundColor: 'rgba(24, 24, 27, 0.72)',
+    borderRadius: 16,
+    padding: 18,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.22)',
+    ...Platform.select({
+      ios: {
+        shadowColor: DCP_TEAL,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+      },
+      android: { elevation: 6 },
+      default: { boxShadow: '0 8px 32px rgba(78, 205, 196, 0.12)' },
+    }),
+  },
+  cardTitle: { color: DCP_CYAN, fontSize: 18, fontWeight: '600', marginBottom: 4 },
+  label: { color: 'rgba(78, 205, 196, 0.75)', fontSize: 13, fontWeight: '500' },
   input: {
-    backgroundColor: 'rgba(34, 34, 34, 0.75)',
+    backgroundColor: 'rgba(9, 9, 11, 0.65)',
     color: '#fff',
     padding: 14,
     borderRadius: 10,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.4)',
+    borderColor: 'rgba(78, 205, 196, 0.2)',
   },
   button: {
-    backgroundColor: 'rgba(0, 119, 182, 0.35)',
+    backgroundColor: 'rgba(0, 119, 182, 0.25)',
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(78, 205, 196, 0.35)',
+    ...Platform.select({
+      ios: { shadowColor: DCP_BLUE, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 6 },
+      android: { elevation: 3 },
+    }),
   },
   buttonText: { color: DCP_TEAL, fontWeight: '600' },
   payButton: {
@@ -282,14 +359,32 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: DCP_TEAL,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.45,
+        shadowRadius: 14,
+      },
+      android: { elevation: 8 },
+      default: { boxShadow: '0 6px 24px rgba(78, 205, 196, 0.4)' },
+    }),
   },
   payButtonText: { color: '#042f2e', fontWeight: '700', fontSize: 16 },
-  details: { marginTop: 8, gap: 6 },
-  detailText: { color: '#ddd', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  hint: { color: 'rgba(102, 102, 102, 0.8)', fontSize: 12, marginTop: 4 },
-  historyRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(51, 51, 51, 0.5)' },
+  detailsPanel: {
+    marginTop: 8,
+    gap: 6,
+    backgroundColor: 'rgba(0, 119, 182, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.2)',
+    borderRadius: 12,
+    padding: 14,
+  },
+  detailText: { color: 'rgba(78, 205, 196, 0.9)', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  hint: { color: 'rgba(0, 168, 232, 0.6)', fontSize: 12, marginTop: 4 },
+  historyRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(78, 205, 196, 0.12)' },
   historyText: { color: '#fff' },
-  historySub: { color: 'rgba(119, 119, 119, 0.8)', fontSize: 12 },
-  empty: { color: 'rgba(102, 102, 102, 0.7)', fontStyle: 'italic' },
-  footer: { color: 'rgba(85, 85, 85, 0.7)', fontSize: 12, textAlign: 'center', marginTop: 12 },
+  historySub: { color: 'rgba(78, 205, 196, 0.55)', fontSize: 12 },
+  empty: { color: 'rgba(78, 205, 196, 0.45)', fontStyle: 'italic' },
+  footer: { color: 'rgba(0, 168, 232, 0.45)', fontSize: 12, textAlign: 'center', marginTop: 12 },
 });
