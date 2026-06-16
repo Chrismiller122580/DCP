@@ -14,6 +14,8 @@ import { BalancesModule } from './balances/balances.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SolanaModule } from './solana/solana.module';
 import { EvmModule } from './evm/evm.module';
+import { AuthModule } from './auth/auth.module';
+import { MerchantsModule } from './merchants/merchants.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { EvmModule } from './evm/evm.module';
       inject: [ConfigService],
     }),
     PrismaModule,
+    AuthModule,
+    MerchantsModule,
     InvoicesModule,
     WebhooksModule,
     DevModule,

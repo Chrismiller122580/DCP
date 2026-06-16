@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface Invoice {
   id: string;
@@ -202,6 +203,8 @@ export default function DCPMerchantDashboard() {
           </a>
 
           <div className="flex items-center gap-4 text-sm">
+            <Link href="/settings" className="text-dcp-teal hover:text-dcp-cyan transition-colors font-medium">API Connections</Link>
+            <Link href="/admin" className="text-dcp-cyan hover:underline">Admin</Link>
             {API_ORIGIN ? (
               <a href={`${API_ORIGIN}/docs`} target="_blank" rel="noopener noreferrer" className="text-dcp-teal hover:text-dcp-cyan transition-colors font-medium">API Docs →</a>
             ) : null}
