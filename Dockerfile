@@ -1,6 +1,9 @@
 # DCP API — production image (monorepo)
 FROM node:20-alpine AS builder
 
+# Prisma engine requires OpenSSL on Alpine (missing by default)
+RUN apk add --no-cache openssl libc6-compat
+
 WORKDIR /app
 COPY package.json package-lock.json turbo.json tsconfig.json ./
 COPY packages ./packages
@@ -13,7 +16,7 @@ RUN npx prisma generate --schema=prisma/schema.prisma
 
 FROM node:20-alpine AS runner
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl libc6-compat
 
 WORKDIR /app
 ENV NODE_ENV=production
