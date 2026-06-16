@@ -135,12 +135,17 @@ export default function DCPPayScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.brandBanner}>
         <View style={styles.brandHeader}>
           <Image source={require('@/assets/images/icon.png')} style={styles.brandIcon} />
-          <Image source={require('@/assets/images/dcp-logo-100.png')} style={styles.brandLogo} resizeMode="contain" />
+          <View>
+            <Image source={require('@/assets/images/dcp-logo-100.png')} style={styles.brandLogo} resizeMode="contain" />
+            <Text style={styles.brandTagline}>Scan • Pay • Get Paid</Text>
+          </View>
         </View>
-        <Text style={styles.subtitle}>Customer app — Scan • Pay • History</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.subtitle}>Direct Connect Pay — Customer Wallet</Text>
 
         {/* Pay Section */}
         <View style={styles.card}>
@@ -231,14 +236,26 @@ export default function DCPPayScreen() {
   );
 }
 
+const DCP_TEAL = '#4ECDC4';
+const DCP_CYAN = '#00A8E8';
+const DCP_BLUE = '#0077B6';
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'rgba(17, 17, 17, 0.92)' },
+  container: { flex: 1, backgroundColor: '#0a0a0b' },
+  brandBanner: {
+    backgroundColor: DCP_BLUE,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 3,
+    borderBottomColor: DCP_TEAL,
+  },
   content: { padding: 20, gap: 20 },
-  brandHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 4 },
-  brandIcon: { width: 40, height: 40, borderRadius: 10 },
-  brandLogo: { width: 120, height: 36 },
-  subtitle: { color: 'rgba(136, 136, 136, 0.9)', textAlign: 'center', marginBottom: 12 },
-  card: { backgroundColor: 'rgba(31, 31, 31, 0.82)', borderRadius: 16, padding: 18, gap: 12, borderWidth: 1, borderColor: 'rgba(51, 51, 51, 0.5)' },
+  brandHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 },
+  brandIcon: { width: 56, height: 56, borderRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.3)' },
+  brandLogo: { width: 140, height: 42 },
+  brandTagline: { color: DCP_TEAL, fontSize: 13, fontWeight: '600', marginTop: 2, letterSpacing: 0.5 },
+  subtitle: { color: DCP_TEAL, textAlign: 'center', marginBottom: 4, fontWeight: '500', fontSize: 14 },
+  card: { backgroundColor: 'rgba(24, 24, 27, 0.95)', borderRadius: 16, padding: 18, gap: 12, borderWidth: 1, borderColor: 'rgba(78, 205, 196, 0.2)' },
   cardTitle: { color: '#fff', fontSize: 18, fontWeight: '600', marginBottom: 4 },
   label: { color: 'rgba(170, 170, 170, 0.85)', fontSize: 13 },
   input: {
@@ -251,22 +268,22 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(51, 51, 51, 0.4)',
   },
   button: {
-    backgroundColor: 'rgba(51, 51, 51, 0.8)',
+    backgroundColor: 'rgba(0, 119, 182, 0.35)',
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(68, 68, 68, 0.5)',
+    borderColor: 'rgba(78, 205, 196, 0.35)',
   },
-  buttonText: { color: '#fff', fontWeight: '600' },
+  buttonText: { color: DCP_TEAL, fontWeight: '600' },
   payButton: {
-    backgroundColor: 'rgba(34, 197, 94, 0.95)',
+    backgroundColor: DCP_TEAL,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
   },
-  payButtonText: { color: '#000', fontWeight: '700', fontSize: 16 },
+  payButtonText: { color: '#042f2e', fontWeight: '700', fontSize: 16 },
   details: { marginTop: 8, gap: 6 },
   detailText: { color: '#ddd', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   hint: { color: 'rgba(102, 102, 102, 0.8)', fontSize: 12, marginTop: 4 },

@@ -172,36 +172,35 @@ export default function DCPMerchantDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950/95 text-white">
+    <div className="min-h-screen text-white">
       {/* Top nav */}
-      <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="https://www.directconnectpay.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+      <header className="dcp-header sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-[4.5rem] flex items-center justify-between">
+          <a href="https://www.directconnectpay.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 hover:opacity-90 transition-opacity">
             <Image
               src="/brand/dcp-icon.png"
               alt="Direct Connect Pay"
-              width={32}
-              height={32}
-              className="rounded-lg"
+              width={48}
+              height={48}
+              className="rounded-xl shadow-lg shadow-[rgba(78,205,196,0.25)]"
               priority
             />
             <div>
               <Image
                 src="/brand/dcp-logo-100.png"
-                alt="DCP"
-                width={100}
-                height={30}
-                className="h-[22px] w-auto"
+                alt="Direct Connect Pay"
+                width={140}
+                height={42}
+                className="h-8 w-auto brightness-110"
                 priority
               />
-              <div className="text-[10px] text-zinc-500 -mt-0.5">MERCHANT DASHBOARD</div>
+              <div className="text-[11px] text-dcp-teal font-medium tracking-widest -mt-0.5">MERCHANT DASHBOARD</div>
             </div>
           </a>
 
           <div className="flex items-center gap-4 text-sm">
-            <div className="text-zinc-400">API</div>
-            <a href={`${API_ORIGIN}/docs`} target="_blank" className="text-emerald-400 hover:underline">Swagger Docs →</a>
-            <div className="h-3 w-px bg-zinc-800" />
+            <a href={`${API_ORIGIN}/docs`} target="_blank" className="text-dcp-teal hover:text-dcp-cyan transition-colors font-medium">API Docs →</a>
+            <div className="h-3 w-px bg-zinc-700" />
             <button 
               onClick={async () => {
                 try {
@@ -210,21 +209,61 @@ export default function DCPMerchantDashboard() {
                   alert(`Demo rates (USD): ${Object.entries(data.rates).map(([k,v]) => `${k}=${v}`).join(', ')}`);
                 } catch {}
               }}
-              className="text-xs text-emerald-400 hover:underline"
+              className="text-xs text-dcp-cyan hover:underline"
             >
               Rates
             </button>
-            <div className="text-zinc-500">Multi-coin (XRPL + 5 others)</div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[rgba(78,205,196,0.12)] text-dcp-teal border border-[rgba(78,205,196,0.25)]">
+              XRPL + 5 chains
+            </span>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Branded hero */}
+        <section className="dcp-hero p-8 md:p-10 mb-8 relative">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-start gap-5">
+              <Image
+                src="/brand/dcp-icon.png"
+                alt=""
+                width={72}
+                height={72}
+                className="rounded-2xl hidden sm:block shadow-xl shadow-[rgba(78,205,196,0.3)]"
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white">
+                  Direct Connect Pay
+                </h1>
+                <p className="text-dcp-teal/90 mt-2 text-lg font-medium">
+                  Crypto payment gateway for merchants
+                </p>
+                <blockquote className="mt-4 text-zinc-300 text-sm md:text-base max-w-2xl border-l-2 border-dcp-teal pl-4 italic">
+                  &ldquo;Creating business to business relationships in the digital world.&rdquo;
+                </blockquote>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 text-right shrink-0">
+              <span className="text-xs text-zinc-500 uppercase tracking-wider">Powered by</span>
+              <span className="text-dcp-cyan font-semibold text-lg">DCP Platform</span>
+              <a
+                href="https://www.directconnectpay.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-dcp-teal hover:underline"
+              >
+                directconnectpay.com →
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Header + API Key */}
         <div className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-semibold tracking-tighter">Payments</h1>
-            <p className="text-zinc-400 mt-1">Create XRPL invoices. Monitor. Get paid in seconds.</p>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">Payments</h2>
+            <p className="text-zinc-400 mt-1">Create invoices. Monitor. Get paid in seconds.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -256,7 +295,7 @@ export default function DCPMerchantDashboard() {
           </div>
           <div className="card p-4">
             <div className="text-xs text-zinc-400">PAID</div>
-            <div className="text-2xl font-semibold mt-1 text-emerald-400">
+            <div className="text-2xl font-semibold mt-1 text-dcp-teal">
               {invoices.filter(i => i.status === 'paid').length}
             </div>
           </div>
