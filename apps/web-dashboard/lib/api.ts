@@ -1,8 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+import { apiPath } from './api-config';
 
-export function apiPath(path: string) {
-  return `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
-}
+export { apiPath, getApiBase } from './api-config';
 
 export async function apiFetch(
   path: string,

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { AppHeader } from '@/components/app-header';
 import { AuthGuard } from '@/components/auth-guard';
+import { apiPath } from '@/lib/api';
 import { getStoredApiKey } from '@/lib/auth';
 
 interface Invoice {
@@ -23,8 +24,6 @@ interface Invoice {
   paymentUri?: string;
 }
 
-// Empty NEXT_PUBLIC_API_URL → same-origin /v1/* (proxied by next.config rewrites)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 export default function DCPMerchantDashboard() {
   const [apiKey, setApiKey] = useState('');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -46,7 +45,7 @@ export default function DCPMerchantDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/v1/invoices`, {
+      const res = await fetch(apiPath('/v1/invoices'), {
         headers: { 'X-API-Key': key },
       });
       if (!res.ok) {
@@ -68,7 +67,7 @@ export default function DCPMerchantDashboard() {
     setError(null);
 
     try {
-      const res = await fetch(`${API_URL}/v1/invoices`, {
+      const res = await fetch(apiPath('/v1/invoices'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +102,7 @@ export default function DCPMerchantDashboard() {
   async function simulatePayment(invoiceId: string) {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/v1/dev/simulate-payment`, {
+      const res = await fetch(apiPath('/v1/dev/simulate-payment'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +137,7 @@ export default function DCPMerchantDashboard() {
     setSelected(inv);
     setWebhookDeliveries([]);
     // Load recent webhook status for this invoice (dev)
-    fetch(`${API_URL}/v1/dev/webhook-deliveries`, { headers: { 'X-API-Key': apiKey } })
+    fetch(apiPath('/v1/dev/webhook-deliveries'), { headers: { 'X-API-Key': apiKey } })
       .then(r => r.json())
       .then(data => {
         const forInvoice = (data.deliveries || []).filter((d: any) => d.invoiceId === inv.id);
@@ -355,7 +354,7 @@ export default function DCPMerchantDashboard() {
             <button 
               onClick={async () => {
                 try {
-                  await fetch(`${API_URL}/v1/dev/reconcile`, { method: 'POST', headers: { 'X-API-Key': apiKey } });
+                  await fetch(apiPath('/v1/dev/reconcile'), { method: 'POST', headers: { 'X-API-Key': apiKey } });
                   setTimeout(() => fetchInvoices(), 2000);
                   alert('Reconciliation triggered - checking for missed payments...');
                 } catch (e) { /* ignore */ }
@@ -546,7 +545,7 @@ export default function DCPMerchantDashboard() {
                 <button
                   onClick={async () => {
                     try {
-                      await fetch(`${API_URL}/v1/dev/reconcile`, { 
+                      await fetch(apiPath('/v1/dev/reconcile'), { 
                         method: 'POST', 
                         headers: { 'X-API-Key': apiKey } 
                       });
