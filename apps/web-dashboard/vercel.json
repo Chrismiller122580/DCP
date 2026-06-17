@@ -4,6 +4,7 @@
   "buildCommand": "cd ../.. && npx turbo run build --filter=web-dashboard",
   "framework": "nextjs",
   "env": {
+    "API_URL": "https://dcp-production.up.railway.app",
     "NEXT_PUBLIC_API_ORIGIN": "https://dcp-production.up.railway.app"
   }
 }
