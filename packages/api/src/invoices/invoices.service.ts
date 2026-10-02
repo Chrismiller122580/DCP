@@ -7,6 +7,8 @@ import * as QRCode from 'qrcode';
 import { Prisma } from '@prisma/client';
 import { POPULAR_COINS } from '@dcp/core';
 
+const GENESIS_ADDRESS = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -39,8 +41,6 @@ export class InvoicesService {
       throw new UnauthorizedException('Invalid API key. For local dev use header X-API-Key: dcp_dev_1234567890');
     }
 
-    // KYC enforcement for compliance/reliability (real systems would call external KYC provider)
-    // Dev merchant below is created with kycVerified=true so this passes in the demo.
     if ((merchant as any).kycVerified === false) {
       throw new BadRequestException('KYC verification required before creating invoices. Update merchant settings or contact support.');
     }
@@ -54,9 +54,11 @@ export class InvoicesService {
     let currency = dto.currency.toUpperCase();
 
     const coinInfo = POPULAR_COINS.find(c => c.chain === dto.chain) || POPULAR_COINS[0];
+    void coinInfo;
 
     if (dto.chain === 'xrpl') {
-      // Real XRPL flow
+      const receive = await this.ensureReceiveAccount(merchant);
+      const tag = await this.allocateDestinationTag(merchant.id);
       const paymentRequest = await this.xrpl.createPaymentRequest({
         merchantId: merchant.id,
         amount: dto.amount,
@@ -64,24 +66,27 @@ export class InvoicesService {
         chain: 'xrpl',
         expiresInMinutes: dto.expiresInMinutes ?? 60,
         metadata: dto.metadata,
+        options: {
+          destinationAddress: receive.address,
+          destinationTag: tag,
+        },
       });
       destinationAddress = paymentRequest.destinationAddress;
       destinationTag = paymentRequest.destinationTag ? Number(paymentRequest.destinationTag) : null;
       memo = paymentRequest.memo ?? null;
-      paymentUri = this.xrpl.buildPaymentUri(destinationAddress, dto.amount, destinationTag);
+      paymentUri = this.xrpl.buildPaymentUri(destinationAddress, dto.amount, destinationTag ?? undefined);
     } else {
-      // Stub for other popular coins (demo / placeholder addresses)
       const placeholders: Record<string, string> = {
         bitcoin: 'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx',
         ethereum: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
         solana: '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-        base: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', // USDC on Base test
+        base: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
         dogecoin: 'nV1q6v3kN2pL8mX7bY5tR9wE4uI3oP6aS',
       };
       destinationAddress = placeholders[dto.chain] || 'demo-address-' + dto.chain;
       destinationTag = Math.floor(Math.random() * 1000000);
       paymentUri = `${dto.chain}:${destinationAddress}?amount=${dto.amount}${destinationTag ? `&tag=${destinationTag}` : ''}`;
-      if (dto.chain === 'base') currency = 'USDC'; // default for that option
+      if (dto.chain === 'base') currency = 'USDC';
     }
 
     const invoice = await this.prisma.invoice.create({
@@ -99,7 +104,6 @@ export class InvoicesService {
       },
     });
 
-    // Build QR (works for any uri)
     let qrCode: string | undefined;
     try {
       qrCode = await QRCode.toDataURL(paymentUri);
@@ -121,7 +125,6 @@ export class InvoicesService {
     });
     if (!invoice) return null;
 
-    // Optionally attach live status from chain here (future)
     return this.toResponseDto(invoice);
   }
 
@@ -138,6 +141,42 @@ export class InvoicesService {
     });
 
     return invoices.map((inv) => this.toResponseDto(inv));
+  }
+
+  private async ensureReceiveAccount(merchant: { id: string; xrplAddress: string | null; xrplSeed: string | null }) {
+    if (merchant.xrplAddress && merchant.xrplAddress !== GENESIS_ADDRESS) {
+      return { address: merchant.xrplAddress };
+    }
+    if (this.xrpl.networkName !== 'testnet') {
+      throw new BadRequestException('Set a funded merchant xrplAddress before creating mainnet invoices.');
+    }
+
+    const funded = await this.xrpl.fundTestnetWallet();
+    if (!funded) {
+      throw new BadRequestException('XRPL testnet faucet did not return a receive account.');
+    }
+
+    const claimed = await this.prisma.merchant.updateMany({
+      where: { id: merchant.id, OR: [{ xrplAddress: null }, { xrplAddress: GENESIS_ADDRESS }] },
+      data: { xrplAddress: funded.address, xrplSeed: funded.seed },
+    });
+    if (claimed.count === 0) {
+      const current = await this.prisma.merchant.findUnique({ where: { id: merchant.id } });
+      if (!current?.xrplAddress) {
+        throw new BadRequestException('Could not store XRPL receive account.');
+      }
+      return { address: current.xrplAddress };
+    }
+    merchant.xrplAddress = funded.address;
+    return { address: funded.address };
+  }
+
+  private async allocateDestinationTag(merchantId: string): Promise<number> {
+    const updated = await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: { nextDestinationTag: { increment: 1 } },
+    });
+    return updated.nextDestinationTag - 1;
   }
 
   private toResponseDto(invoice: any, qrCode?: string, paymentUri?: string): InvoiceResponseDto {

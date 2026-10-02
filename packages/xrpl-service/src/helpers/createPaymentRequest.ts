@@ -1,68 +1,47 @@
-import { generateId } from '@dcp/core';
 import { XrplConfig, XrplInvoiceOptions, XrplPaymentDetails } from '../types';
+import { generateId } from '@dcp/core';
 import { getXrplClient } from '../client';
-import { Client } from 'xrpl';
+import { xrpToDrops } from './drops';
+
+/** Classic XRPL genesis account. Never a merchant receive address. */
+export const XRPL_GENESIS_ADDRESS = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 
 /**
- * Creates a fresh XRPL payment request.
- * - Generates (or accepts) a Destination Tag (0-4294967295)
- * - Optionally creates a new funded address per invoice (recommended for isolation, non-custodial monitor-only)
- * - Or reuses a merchant hot wallet address + unique tag (cheaper, still non-custodial)
- *
- * For MVP we default to merchant-provided or generated "receive" address + unique tag.
- * In production, best practice: generate unique destination account per invoice for maximum isolation.
+ * Build a payment request for a merchant-owned receive address and a caller-allocated tag.
+ * Does not pick an address. The API funds a testnet account (or the merchant sets one) and
+ * allocates the tag from Merchant.nextDestinationTag.
  */
 export async function createPaymentRequest(
-  amount: string, // human XRP e.g. "10.5"
+  amount: string,
   options: XrplInvoiceOptions = {},
-  config: XrplConfig = { network: 'testnet' }
+  _config: XrplConfig = { network: 'testnet' },
 ): Promise<XrplPaymentDetails & { invoiceRef: string }> {
-  const client = await getXrplClient(config);
-
-  // In real impl, merchant can pass a funded "receiveAddress" or we generate ephemeral.
-  // For simplicity + non-custodial: we expect caller (API) to provide the merchant's XRPL address.
-  // Here we simulate / placeholder - in practice passed from merchant config.
-  // We'll let caller inject the destination. For now use a test faucet style placeholder.
-  const destinationAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'; // classic XRPL genesis/test account - REPLACE in real use
-
-  // Destination Tag: unique per invoice for correlation (0-4294967295)
-  const destinationTag =
-    options.destinationTag ??
-    Math.floor(Math.random() * 2147483647); // safe positive 31-bit
-
-  const memo = options.memo;
-
-  // Validate amount looks reasonable
-  if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-    throw new Error('Invalid XRP amount');
+  const destinationAddress = options.destinationAddress;
+  if (!destinationAddress || destinationAddress === XRPL_GENESIS_ADDRESS) {
+    throw new Error('XRPL receive address is required and cannot be the genesis account');
   }
-
-  const invoiceRef = generateId('xrpl');
+  if (options.destinationTag == null || !Number.isInteger(options.destinationTag) || options.destinationTag < 1) {
+    throw new Error('XRPL destination tag must be a positive integer allocated by the API');
+  }
+  xrpToDrops(amount);
 
   return {
     destinationAddress,
-    destinationTag,
-    memo,
+    destinationTag: options.destinationTag,
+    memo: options.memo,
     amount,
     currency: 'XRP',
-    invoiceRef,
+    invoiceRef: generateId('xrpl'),
   };
 }
 
-/**
- * Fund a testnet account (helper for local dev / tests only).
- * Real merchants fund their own addresses.
- */
-export async function fundTestnetAccount(address?: string, config: XrplConfig = { network: 'testnet' }): Promise<string | null> {
+/** Fund a fresh testnet account. Returns null off testnet. Seed is for the receive wallet only. */
+export async function fundTestnetAccount(
+  config: XrplConfig = { network: 'testnet' },
+): Promise<{ address: string; seed: string } | null> {
   if (config.network !== 'testnet') return null;
   const client = await getXrplClient(config);
-  try {
-    // fundWallet() creates + funds a fresh test account. We return the address.
-    // To fund a specific pre-created address on XRPL testnet, use the public faucet endpoint.
-    const { wallet } = await client.fundWallet();
-    return wallet.classicAddress;
-  } catch (e) {
-    console.warn('[xrpl] fundTestnetAccount warning:', (e as Error).message);
-    return null;
-  }
+  const { wallet } = await client.fundWallet();
+  if (!wallet.seed) return null;
+  return { address: wallet.classicAddress, seed: wallet.seed };
 }

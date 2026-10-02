@@ -12,8 +12,8 @@ export type InvoiceStatus =
 export interface Invoice {
   id: string;
   merchantId: string;
-  amount: string; // in smallest unit or decimal string, e.g. "10.50" for USD equiv or token units
-  currency: string; // 'XRP' | 'USDC' | 'USD' (fiat for display)
+  amount: string;
+  currency: string;
   chain: Chain;
   destinationAddress: string;
   destinationTag?: number | string;
@@ -35,14 +35,14 @@ export interface CreateInvoiceInput {
   chain: Chain;
   expiresInMinutes?: number;
   metadata?: Record<string, unknown>;
-  // For XRPL specifically can pass preferred tag range or other options
   options?: {
+    destinationAddress?: string;
     destinationTag?: number;
     memo?: string;
   };
 }
 
 export interface InvoiceWithQR extends Invoice {
-  qrCodeDataUrl?: string; // data:image/png;base64,...
-  paymentUri?: string; // e.g. xrpl: or xumm pay link style
+  qrCodeDataUrl?: string;
+  paymentUri?: string;
 }

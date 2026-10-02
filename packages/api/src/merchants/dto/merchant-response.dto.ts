@@ -6,6 +6,8 @@ export class MerchantResponseDto {
   webhookUrl?: string | null;
   hasWebhookSecret!: boolean;
   kycVerified!: boolean;
+  xrplAddress?: string | null;
+  hasXrplSeed!: boolean;
   invoiceCount!: number;
   paidCount!: number;
   createdAt!: string;

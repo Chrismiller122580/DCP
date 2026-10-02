@@ -3,5 +3,7 @@ export * from './XrplPaymentProvider';
 export * from './types';
 export * from './helpers/createPaymentRequest';
 export * from './helpers/monitorTransaction';
+export * from './helpers/findAccountPayment';
+export * from './helpers/drops';
 export * from './helpers/buildQR';
 export * from './client';

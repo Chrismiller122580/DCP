@@ -1,8 +1,8 @@
 import { PaymentProvider, CreatePaymentResult, VerifyPaymentParams, PaymentVerificationResult } from '@dcp/blockchain';
 import { CreateInvoiceInput, Chain } from '@dcp/core';
 import { createPaymentRequest } from './helpers/createPaymentRequest';
-import { monitorTransaction } from './helpers/monitorTransaction';
-import { buildXrplPaymentUri } from './helpers/buildQR';
+import { findAccountPayment } from './helpers/findAccountPayment';
+import { dropsCoverInvoice, dropsToXrp } from './helpers/drops';
 import { XrplConfig } from './types';
 import { getXrplClient } from './client';
 import { Payment } from 'xrpl';
@@ -20,11 +20,11 @@ export class XrplPaymentProvider implements PaymentProvider {
     const { amount, currency, options } = input;
 
     if (currency.toUpperCase() !== 'XRP') {
-      // For MVP we only support native XRP. Stablecoin (issued) support later.
       throw new Error('XRPL provider currently only supports XRP (native). Use issued currencies in v1.');
     }
 
     const details = await createPaymentRequest(amount, {
+      destinationAddress: options?.destinationAddress,
       destinationTag: options?.destinationTag,
       memo: options?.memo,
     }, this.config);
@@ -45,21 +45,18 @@ export class XrplPaymentProvider implements PaymentProvider {
 
   async verifyPayment(params: VerifyPaymentParams): Promise<PaymentVerificationResult> {
     if (!params.txHash) {
-      // If no txHash we can still monitor for it (used by listener)
-      if (!params.destinationTag || !params.destinationAddress) {
+      if (params.destinationTag == null || !params.destinationAddress) {
         return { isValid: false };
       }
-      const res = await monitorTransaction(
+      const found = await findAccountPayment(
         params.destinationAddress,
         Number(params.destinationTag),
         params.expectedAmount,
-        30_000,
-        this.config
+        this.config,
       );
-      return res || { isValid: false };
+      return found ?? { isValid: false };
     }
 
-    // Fast path: fetch specific tx by hash and validate
     const client = await getXrplClient(this.config);
     try {
       const txResponse = await client.request({
@@ -74,26 +71,24 @@ export class XrplPaymentProvider implements PaymentProvider {
       }
 
       const payment = tx as Payment;
-      const amountStr = typeof payment.Amount === 'string' ? payment.Amount : undefined;
-      if (!amountStr) return { isValid: false };
-
-      const drops = BigInt(amountStr);
-      const xrpReceived = (Number(drops) / 1_000_000).toFixed(6).replace(/\.?0+$/, '');
+      if (typeof payment.Amount !== 'string') return { isValid: false };
+      if (!dropsCoverInvoice(payment.Amount, params.expectedAmount)) return { isValid: false };
 
       const tagMatch = params.destinationTag == null || Number(payment.DestinationTag) === Number(params.destinationTag);
       const addrMatch = payment.Destination === params.destinationAddress;
+      if (!addrMatch || !tagMatch) return { isValid: false };
 
       return {
-        isValid: addrMatch && tagMatch,
+        isValid: true,
         txHash: tx.hash,
-        amountReceived: xrpReceived,
+        amountReceived: dropsToXrp(payment.Amount),
         fromAddress: payment.Account,
         destinationTag: payment.DestinationTag,
         confirmedAt: tx.close_time_iso ? new Date(tx.close_time_iso) : new Date(),
         ledgerIndex: tx.ledger_index,
         rawTx: tx,
       };
-    } catch (e) {
+    } catch {
       return { isValid: false };
     }
   }
@@ -114,22 +109,18 @@ export class XrplPaymentProvider implements PaymentProvider {
           streamTx.engine_result === 'tesSUCCESS';
         if (!engineOk) return;
 
-        // XRPL stream payloads vary: full tx under `transaction` or `tx_json`
         const payment = (streamTx.transaction ?? streamTx.tx_json) as Payment | undefined;
         if (!payment || payment.TransactionType !== 'Payment') return;
         if (payment.Destination !== address) return;
+        if (typeof payment.Amount !== 'string') return;
 
         const txHash = streamTx.hash ?? payment.hash;
         if (!txHash) return;
 
-        // Note: caller (listener) is responsible for matching tag + amount to known invoices
         const result: PaymentVerificationResult = {
           isValid: true,
           txHash,
-          amountReceived:
-            typeof payment.Amount === 'string'
-              ? (Number(payment.Amount) / 1_000_000).toFixed(6)
-              : undefined,
+          amountReceived: dropsToXrp(payment.Amount),
           fromAddress: payment.Account,
           destinationTag: payment.DestinationTag,
           confirmedAt: new Date(streamTx.close_time_iso || Date.now()),
@@ -139,7 +130,6 @@ export class XrplPaymentProvider implements PaymentProvider {
 
         await onPayment(result);
       } catch (err) {
-        // Never let stream parsing crash the API process
         console.warn('[XRPL] payment stream handler skipped message:', err);
       }
     };
@@ -154,7 +144,9 @@ export class XrplPaymentProvider implements PaymentProvider {
     return async () => {
       try {
         await client.request({ command: 'unsubscribe', accounts: [address] });
-      } catch {}
+      } catch {
+        // already disconnected
+      }
       client.off('transaction', handler as any);
     };
   }
@@ -170,7 +162,6 @@ export class XrplPaymentProvider implements PaymentProvider {
       account: address,
       ledger_index: 'validated',
     });
-    const drops = resp.result.account_data.Balance;
-    return (Number(drops) / 1_000_000).toFixed(6);
+    return dropsToXrp(resp.result.account_data.Balance);
   }
 }

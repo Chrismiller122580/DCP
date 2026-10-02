@@ -1,5 +1,5 @@
 // Prisma schema for DCP
-// Run: cd packages/api && npx prisma generate   (or from root npm run db:generate)
+// Run: cd packages/api && npx prisma migrate dev --schema=../../prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -20,6 +20,11 @@ model Merchant {
   kycVerified   Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Testnet: funded on first XRPL invoice. Mainnet: set xrplAddress yourself; seed stays null.
+  xrplAddress        String? @unique
+  xrplSeed           String?
+  nextDestinationTag Int     @default(1)
 
   invoices Invoice[]
 }
@@ -49,6 +54,9 @@ model Invoice {
   metadata            Json?    @default("{}")
 
   events              PaymentEvent[]
+
+  @@unique([destinationAddress, destinationTag])
+  @@index([destinationAddress, destinationTag, status])
 }
 
 model PaymentEvent {
