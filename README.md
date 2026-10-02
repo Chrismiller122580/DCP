@@ -76,10 +76,12 @@ Build a **100% owned** crypto payment platform called **DCP** where XRP Ledger (
 All documented with OpenAPI.
 
 ## XRPL Implementation Notes
-- Use `xrpl.js` for connection, Payment tx, subscribe to account.
-- Use Destination Tag + Memo for invoice correlation.
-- Start with XRPL testnet, then mainnet toggle.
-- Include helper functions: createPaymentRequest, monitorTransaction, buildQR.
+- Use `xrpl.js` for connection, Payment tx, and account subscriptions.
+- The first testnet invoice funds a fresh receive account via the faucet and stores it on the merchant (`xrplAddress` + `xrplSeed`, so you can import and sweep). Mainnet does not generate a seed; set `xrplAddress` yourself.
+- Destination tags are allocated from `Merchant.nextDestinationTag` and unique per receive address.
+- Confirmation matches address + tag and compares integer drops. Overpay confirms. Underpay does not.
+- The listener subscribes to each merchant receive address and polls `account_tx` every 45 seconds, including while the socket is up.
+- Never use the genesis account `rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh`.
 
 ## Development Roadmap
 1. Initialize Turborepo + packages (api, xrpl-service, mobile, web)

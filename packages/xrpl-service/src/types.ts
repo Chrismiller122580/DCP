@@ -6,15 +6,15 @@ export interface XrplConfig {
 }
 
 export interface XrplInvoiceOptions {
+  destinationAddress?: string;
   destinationTag?: number;
   memo?: string;
-  // future: useEscrow, useIssuedCurrency etc.
 }
 
 export interface XrplPaymentDetails {
   destinationAddress: string;
   destinationTag: number;
   memo?: string;
-  amount: string; // in XRP (drops or decimal)
+  amount: string;
   currency: 'XRP';
 }

@@ -11,8 +11,15 @@ describe('XrplListenerService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         XrplListenerService,
-        { provide: XrplService, useValue: { subscribeToPayments: jest.fn().mockResolvedValue(() => {}) } },
-        { provide: PrismaService, useValue: { invoice: { findMany: jest.fn().mockResolvedValue([]) }, $transaction: jest.fn() } },
+        { provide: XrplService, useValue: { subscribeToPayments: jest.fn().mockResolvedValue(() => {}), verifyPayment: jest.fn() } },
+        {
+          provide: PrismaService,
+          useValue: {
+            invoice: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn() },
+            merchant: { findMany: jest.fn().mockResolvedValue([]) },
+            $transaction: jest.fn(),
+          },
+        },
         { provide: WebhooksService, useValue: { sendWebhook: jest.fn() } },
       ],
     }).compile();

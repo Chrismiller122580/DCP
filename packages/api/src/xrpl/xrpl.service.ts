@@ -1,9 +1,9 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { XrplPaymentProvider } from '@dcp/xrpl-service';
+import { XrplPaymentProvider, fundTestnetAccount } from '@dcp/xrpl-service';
 import { CreateInvoiceInput } from '@dcp/core';
-import { CreatePaymentResult, PaymentVerificationResult } from '@dcp/blockchain';
-import { Client, Payment, xrpToDrops } from 'xrpl';
+import { CreatePaymentResult, PaymentVerificationResult, VerifyPaymentParams } from '@dcp/blockchain';
+import { xrpToDrops } from 'xrpl';
 
 @Injectable()
 export class XrplService implements OnModuleDestroy {
@@ -13,9 +13,13 @@ export class XrplService implements OnModuleDestroy {
   constructor(private config: ConfigService) {
     this.network = (this.config.get('XRPL_NETWORK') as 'testnet' | 'mainnet') || 'testnet';
     if (this.network === 'mainnet') {
-      console.warn('[XRPL] Mainnet mode enabled - ensure funded merchant addresses and no test seeds. Use with caution for production reliability.');
+      console.warn('[XRPL] Mainnet mode enabled - merchant xrplAddress must be set. No seeds are generated.');
     }
     this.provider = new XrplPaymentProvider({ network: this.network });
+  }
+
+  get networkName(): 'testnet' | 'mainnet' {
+    return this.network;
   }
 
   async createPaymentRequest(input: CreateInvoiceInput): Promise<CreatePaymentResult> {
@@ -33,15 +37,22 @@ export class XrplService implements OnModuleDestroy {
     return this.provider.subscribeToPayments(address, onPayment);
   }
 
+  async verifyPayment(params: VerifyPaymentParams): Promise<PaymentVerificationResult> {
+    return this.provider.verifyPayment(params);
+  }
+
+  /** Fund a fresh testnet receive account. Null on mainnet. */
+  async fundTestnetWallet(): Promise<{ address: string; seed: string } | null> {
+    return fundTestnetAccount({ network: this.network });
+  }
+
   async getBalance(address: string): Promise<string> {
     return this.provider.getBalance ? this.provider.getBalance(address) : '0';
   }
 
-  // XRPL Escrow support for reliable conditional payments (v1 feature)
-  // Uses real xrpl.js to create/finish/cancel escrow on testnet for demo reliability
   async createEscrow(destination: string, amount: string, finishAfter: number, cancelAfter?: number, condition?: string) {
-    const client = await this.getClient(); // assume helper or use provider
-    const { wallet } = await client.fundWallet(); // demo funded sender (in prod: merchant wallet)
+    const client = await this.getClient();
+    const { wallet } = await client.fundWallet();
     const escrowCreate: any = {
       TransactionType: 'EscrowCreate',
       Account: wallet.classicAddress,
@@ -68,7 +79,7 @@ export class XrplService implements OnModuleDestroy {
 
   async finishEscrow(owner: string, escrowSequence: number, condition?: string, fulfillment?: string) {
     const client = await this.getClient();
-    const { wallet } = await client.fundWallet(); // demo
+    const { wallet } = await client.fundWallet();
     const escrowFinish: any = {
       TransactionType: 'EscrowFinish',
       Account: wallet.classicAddress,
@@ -114,4 +125,3 @@ export class XrplService implements OnModuleDestroy {
     // cleanup if needed in future
   }
 }
-

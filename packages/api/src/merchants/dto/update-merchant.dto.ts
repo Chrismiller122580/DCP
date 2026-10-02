@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUrl, Matches } from 'class-validator';
 
 export class UpdateMerchantDto {
   @IsOptional()
@@ -16,4 +16,9 @@ export class UpdateMerchantDto {
   @IsOptional()
   @IsBoolean()
   kycVerified?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/)
+  xrplAddress?: string;
 }

@@ -7,6 +7,8 @@ import { UpdateMerchantDto } from './dto/update-merchant.dto';
 import { MerchantCreatedDto, MerchantResponseDto } from './dto/merchant-response.dto';
 import { ConnectionTestResultDto } from './dto/test-connection.dto';
 
+const GENESIS_ADDRESS = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+
 @Injectable()
 export class MerchantsService {
   constructor(
@@ -74,6 +76,13 @@ export class MerchantsService {
     if (dto.webhookUrl !== undefined) data.webhookUrl = dto.webhookUrl;
     if (dto.kycVerified !== undefined) data.kycVerified = dto.kycVerified;
     if (dto.webhookSecret !== undefined) data.webhookSecret = dto.webhookSecret;
+    if (dto.xrplAddress !== undefined) {
+      if (dto.xrplAddress === GENESIS_ADDRESS) {
+        throw new BadRequestException('XRPL genesis account cannot be a receive address');
+      }
+      data.xrplAddress = dto.xrplAddress;
+      data.xrplSeed = null;
+    }
     if (dto.webhookUrl && !merchant.webhookSecret && dto.webhookSecret === undefined) {
       data.webhookSecret = generateWebhookSecret();
     }
@@ -186,6 +195,8 @@ export class MerchantsService {
       webhookUrl: merchant.webhookUrl,
       hasWebhookSecret: Boolean(merchant.webhookSecret),
       kycVerified: merchant.kycVerified,
+      xrplAddress: merchant.xrplAddress ?? null,
+      hasXrplSeed: Boolean(merchant.xrplSeed),
       invoiceCount: merchant._count?.invoices ?? 0,
       paidCount,
       createdAt: merchant.createdAt.toISOString(),

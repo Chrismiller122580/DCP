@@ -67,11 +67,11 @@ export class ReconciliationService implements OnModuleInit, OnModuleDestroy {
 
         if (invoice.chain === 'xrpl' && invoice.destinationAddress && invoice.destinationTag) {
           // Use XRPL verify (leverages listener logic)
-          const result = await this.xrpl['provider']?.verifyPayment?.({
+          const result = await this.xrpl.verifyPayment({
             destinationAddress: invoice.destinationAddress,
             destinationTag: invoice.destinationTag,
             expectedAmount: invoice.amount,
-          } as any);
+          });
 
           if (result?.isValid) {
             verified = true;
